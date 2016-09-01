@@ -38,6 +38,24 @@ class CrossEntropyCost(object):
 
         return  (estimate - true) / ((1 - estimate)*estimate)
 
+class LogLikelihoodCost(object):
+    """
+    """
+
+    @staticmethod
+    def func(estimate, true):
+        """
+        """
+
+        return
+    
+    @staticmethod
+    def derivative(estimate, true):
+        """
+        """
+
+        return
+
 class SigmoidActivation(object):
     """Return the value and derivative for the sigmoid function given
     a value or np.array of values.
@@ -94,20 +112,39 @@ class ReLUActivation(object):
 
         return np.greater(0, z).astype(int)
 
+class SoftmaxActivation(object):
+    """
+    """
+    
+    @staticmethod
+    def func(z):
+        """
+        """
+
+        return
+
+    @staticmethod
+    def derivative(z):
+        """
+        """
+
+        return
+
 class Network(object):
 
-    def __init__(self, size, active=TanhActivation(), cost=QuadraticCost(), learn=0.1, reg=0.0):
+    def __init__(self, size, active=TanhActivation(), cost=QuadraticCost(), output=None, learn=0.1, reg=0.0):
         """
         """
         self.layers = len(size)
         self.size = size
         self.active = active
+        self.outfunc = output
         self.cost = cost
         self.eta = learn
         self.gamma = reg
         self.bias = []
         self.weights = []
-        self.init_weights()
+        self.init_weights_alt()
 
     def init_weights(self):
         """
@@ -118,6 +155,16 @@ class Network(object):
 
         for j, k in zip(self.size[1:], self.size[:-1]):
             self.weights.append(np.random.randn(j,k) / np.sqrt(k))
+
+    def init_weights_alt(self):
+        """
+        """
+
+        for j in self.size[1:]:
+            self.bias.append(np.zeros((j, 1)))
+
+        for j, k in zip(self.size[1:], self.size[:-1]):
+            self.weights.append(np.random.randn(j,k) * np.sqrt(2.0/k))
 
     def set_hyper_parameters(self, learn=0.1, reg=0.0):
         """
@@ -132,36 +179,18 @@ class Network(object):
         for b, w in zip(self.bias, self.weights):
             grad_b.append(np.zeros(b.shape))
             grad_w.append(np.zeros(w.shape))
-    
-        # y = y.reshape(len(y), 1)
-        # act = x.reshape(len(x), 1)
+
         act = x
         act_list = [act]
         z_list = []
 
-        #print(np.dot(self.weights[0], x) + self.bias[0].transpose())
-        #print(self.bias[0])
-
-        # print(x)
-        # print(x.shape)
-        # print('\n')
         for b, w in zip(self.bias, self.weights):
-            # print(w)
-            # print('\n')
-            # print(b)
-            # print('\n')
             z = np.dot(w, act) + b
-            # print(z)
-            # print('\n')
             z_list.append(z)
             act = self.active.func(z)
             act_list.append(act)
 
-        #print(act_list[-1])
-        #print(y.shape)
-        #print(z_list[-1])
         delta = self.cost.derivative(act_list[-1], y) * self.active.derivative(z_list[-1])
-        #print(delta)
         grad_b[-1] = delta
         grad_w[-1] = np.dot(delta, act_list[-2].transpose())
 
@@ -169,10 +198,6 @@ class Network(object):
             delta = np.dot(self.weights[-l+1].transpose(), delta) * self.active.derivative(z_list[-l])
             grad_b[-l] = delta
             grad_w[-l] = np.dot(delta, act_list[-l-1].transpose())
-            # print(grad_b[-l].shape)
-            # print('\n')
-            # print(grad_w[-l].shape)
-            # print('\n')
 
         return (grad_b, grad_w)
 
@@ -182,12 +207,13 @@ class Network(object):
 
         batch_list = []
         n_training = len(training_data)
-        time_elapse = time.process_time() 
+        time_start = time.process_time() 
 
-        for i in range(epochs):
+        for i in range(0, epochs):
             random.shuffle(training_data)
-            time_elapse = time.process_time() - time_elapse
-            print('Time: {:2.3}'.format(time_elapse))
+            time_end = time.process_time()
+            print('Time: {:2.3}'.format(time_end - time_start))
+            time_start = time.process_time()
             for j in range(0, n_training, batch_size):
                 batch_list.append(training_data[j:j+batch_size])
 
@@ -195,7 +221,7 @@ class Network(object):
                 self.update_weights(batch, n_training)
             batch_list.clear()
 
-            print('Epoch {}: {}'.format(i, self.accuracy(training_data)))
+            # print('Epoch {}: {}'.format(i, self.accuracy(training_data)))
             # print('Epoch {} finished.'.format(i))
     
     def update_weights(self, batch, n_training):
@@ -229,7 +255,6 @@ class Network(object):
         a = input_act
         for b, w in zip(self.bias, self.weights):
             a = self.active.func(np.dot(w, a) + b)
-        # print(a)
         return a
 
     def accuracy(self, data):
