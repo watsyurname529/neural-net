@@ -1,4 +1,5 @@
 import random
+import time
 import numpy as np
 
 class QuadraticCost(object):
@@ -93,11 +94,6 @@ class ReLUActivation(object):
 
         return np.greater(0, z).astype(int)
 
-        # if z > np.zeros(z.shape):
-        #     return 1
-        # if z <= np.zeros(z.shape):
-        #     return 0
-
 class Network(object):
 
     def __init__(self, size, active=TanhActivation(), cost=QuadraticCost(), learn=0.1, reg=0.0):
@@ -186,15 +182,22 @@ class Network(object):
 
         batch_list = []
         n_training = len(training_data)
+        time_elapse = time.process_time() 
+
         for i in range(epochs):
             random.shuffle(training_data)
-            
+            time_elapse = time.process_time() - time_elapse
+            print('Time: {:2.3}'.format(time_elapse))
             for j in range(0, n_training, batch_size):
                 batch_list.append(training_data[j:j+batch_size])
 
             for batch in batch_list:
                 self.update_weights(batch, n_training)
+            batch_list.clear()
 
+            print('Epoch {}: {}'.format(i, self.accuracy(training_data)))
+            # print('Epoch {} finished.'.format(i))
+    
     def update_weights(self, batch, n_training):
         """
         """

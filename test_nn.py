@@ -16,15 +16,16 @@ for n in range(num_points):
         identity[c] = 1
         training_data.append((np.array([[x],[y]]), identity))
 
-#print(x)
-#print(y)
+# print(x)
+# print(y)
 # print(training_data)
 
 print("Initializing Neural Net")
-net = nn.Network([2,10,3], nn.SigmoidActivation(), nn.CrossEntropyCost())
-net.set_hyper_parameters(0.01, 0.001)
+# net = nn.Network([2,15,3], nn.SigmoidActivation(), nn.QuadraticCost())
+net = nn.Network([2,10,3], nn.TanhActivation(), nn.QuadraticCost())
+net.set_hyper_parameters(0.10, 0.002)
 print("Pre training accuracy: {}".format(net.accuracy(training_data)))
 print("Training Net...")
-net.batch_SGD(training_data, 100, 5)
+net.batch_SGD(training_data, 50, 5)
 print("Done.")
 print("Post training accuracy: {}".format(net.accuracy(training_data)))
