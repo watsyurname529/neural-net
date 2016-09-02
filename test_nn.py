@@ -21,9 +21,10 @@ for n in range(num_points):
 # print(training_data)
 
 print("Initializing Neural Net")
-# net = nn.Network([2,15,3], nn.SigmoidActivation(), nn.QuadraticCost())
-net = nn.Network([2,50,3], nn.TanhActivation(), nn.QuadraticCost())
+# net = nn.Network([2,30,3], nn.SigmoidActivation(), nn.QuadraticCost())
+# net = nn.Network([2,30,3], nn.TanhActivation(), nn.QuadraticCost())
 # net = nn.Network([2,30,3], nn.ReLUActivation(), nn.QuadraticCost())
+net = nn.Network([2,30,3], nn.TanhActivation(), nn.CrossEntropyCost(), nn.SigmoidActivation())
 net.set_hyper_parameters(0.05, 0.001)
 print("Pre training accuracy: {}".format(net.accuracy(training_data)))
 print("Training Net...")

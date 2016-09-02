@@ -138,7 +138,7 @@ class Network(object):
         self.layers = len(size)
         self.size = size
         self.active = active
-        self.outfunc = output
+        self.outlayer = output
         self.cost = cost
         self.eta = learn
         self.gamma = reg
@@ -190,7 +190,13 @@ class Network(object):
             act = self.active.func(z)
             act_list.append(act)
 
-        delta = self.cost.derivative(act_list[-1], y) * self.active.derivative(z_list[-1])
+        if(self.outlayer != None):
+            act_list[-1] = self.outlayer.func(z_list[-1])
+            delta = self.cost.derivative(act_list[-1], y) * self.outlayer.derivative(z_list[-1])
+        
+        else:
+            delta = self.cost.derivative(act_list[-1], y) * self.active.derivative(z_list[-1])
+        
         grad_b[-1] = delta
         grad_w[-1] = np.dot(delta, act_list[-2].transpose())
 
