@@ -1,5 +1,6 @@
 import random
 import time
+import json
 import numpy as np
 
 class QuadraticCost(object):
@@ -277,3 +278,27 @@ class Network(object):
 
         return correct
         # return sum(int(x==y) for (x, y) in results)
+
+    def save_json(self, filename):
+        """
+        """
+
+        with open(filename, 'w') as json_file:
+            data = {'size': self.size,
+                    'weights': [w.tolist() for w in self.weights],
+                    'bias': [b.tolist() for b in self.bias]}
+            json_file.write(json.dumps(data, indent=4))
+
+    def load_json(self, filename):
+        """
+        """
+
+        with open(filename, 'r') as json_file:
+            data = json.load(json_file)
+            if(data['size'] != self.size):
+                print("Size does not match. Load failed.")
+                return -1
+            else:
+                self.weights = [np.array(w) for w in data['weights']]
+                self.bias = [np.array(b) for b in data['bias']]
+                return 0
