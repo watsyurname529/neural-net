@@ -134,7 +134,10 @@ class SoftmaxActivation(object):
 class Network(object):
 
     def __init__(self, size, active=TanhActivation(), cost=QuadraticCost(), output=None, learn=0.1, reg=0.0):
-        """
+        """The Constuctor for the Neural Net. Sets the topology for the net and can optionally set the activation
+        and cost functions along with the learning and regularization rate. The active and cost arguments must be
+        passed a function. The constructor also initializes the weights and biases according to the selected init
+        function.
         """
         self.layers = len(size)
         self.size = size
@@ -148,9 +151,9 @@ class Network(object):
         self.init_weights_alt()
 
     def init_weights(self):
+        """Initialize weights method 1. The biases are random numbers from a simple gaussian and the weights
+        are from a gaussian scaled to the size of the network and then normalized to form a sharper peak.
         """
-        """
-        
         for j in self.size[1:]:
             self.bias.append(np.random.randn(j, 1))
 
@@ -158,9 +161,9 @@ class Network(object):
             self.weights.append(np.random.randn(j,k) / np.sqrt(k))
 
     def init_weights_alt(self):
+        """Initialize weights method 2. The biases are all set to zero and the weights are from a gaussian
+        with a different normalization to form a sharper peak.
         """
-        """
-
         for j in self.size[1:]:
             self.bias.append(np.zeros((j, 1)))
 
@@ -168,13 +171,15 @@ class Network(object):
             self.weights.append(np.random.randn(j,k) * np.sqrt(2.0/k))
 
     def set_hyper_parameters(self, learn=0.1, reg=0.0):
-        """
+        """Sets the learning and regularization rates for the network. The function is here to provide a 
+        translation from the math variables to the meaning of each.
         """
         self.eta = learn
         self.gamma = reg
 
     def backprop(self, x, y):
-        """
+        """The backpropagation algorithm. Takes a single input and output (label). Returns a tuple of the 
+        gradient for both the bias and weights.
         """
         grad_b, grad_w = [], []
         for b, w in zip(self.bias, self.weights):
@@ -209,9 +214,9 @@ class Network(object):
         return (grad_b, grad_w)
 
     def batch_SGD(self, training_data, epochs, batch_size):
+        """The Batch Stochastic Gradient algorithm and loop. Training data must be properly formatted for
+        the matrix math to work.
         """
-        """
-
         batch_list = []
         n_training = len(training_data)
         time_start = time.process_time() 
@@ -232,9 +237,8 @@ class Network(object):
             # print('Epoch {} finished.'.format(i))
     
     def update_weights(self, batch, n_training):
+        """Update the weights and biases using Backpropagation and a L2 Regularization term.
         """
-        """
-
         m = len(batch)
         grad_b, grad_w = [], []
         for b, w in zip(self.bias, self.weights):
@@ -257,7 +261,8 @@ class Network(object):
         self.bias = new_bias
 
     def output(self, input_act):
-        """
+        """Calculates the output of the Neural Net with the current set of weights and biases.
+        Returns the output vector.
         """
         a = input_act
         for b, w in zip(self.bias, self.weights):
@@ -265,9 +270,9 @@ class Network(object):
         return a
 
     def accuracy(self, data):
+        """Test the accuracy of a properly formatted set of data. Returns the raw number of correct
+        samples. 
         """
-        """
-
         correct = 0
         # results = []
         for (x, y) in data:
@@ -280,9 +285,9 @@ class Network(object):
         # return sum(int(x==y) for (x, y) in results)
 
     def save_json(self, filename):
+        """Save the weights and biases using a JSON format. The file saves all the weights and biases
+        and the list containing the size of the network.
         """
-        """
-
         with open(filename, 'w') as json_file:
             data = {'size': self.size,
                     'weights': [w.tolist() for w in self.weights],
@@ -290,9 +295,10 @@ class Network(object):
             json_file.write(json.dumps(data, indent=4))
 
     def load_json(self, filename):
+        """Load a JSON formatted file with a set of weights and biases. Function checks if the sizes of
+        this Network and saved Network match and gives fails with an error code if they differ. Does not
+        check if the activation functions are the same.
         """
-        """
-
         with open(filename, 'r') as json_file:
             data = json.load(json_file)
             if(data['size'] != self.size):
